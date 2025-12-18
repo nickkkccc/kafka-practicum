@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>kafka.lessons</groupId>
+    <artifactId>root</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+  </parent>
+
+  <properties>
+    <jib-maven-plugin.version>3.5.1</jib-maven-plugin.version>
+    <producer.main.class>kafka.lessons.producer.Producer</producer.main.class>
+    <base.image>eclipse-temurin:17-jre</base.image>
+  </properties>
+
+  <artifactId>L2</artifactId>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.instancio</groupId>
+      <artifactId>instancio-core</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.kafka</groupId>
+      <artifactId>kafka-clients</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.dataformat</groupId>
+      <artifactId>jackson-dataformat-cbor</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
+    </dependency>
+  </dependencies>
+
+  <profiles>
+    <profile>
+      <id>producer</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>com.google.cloud.tools</groupId>
+            <artifactId>jib-maven-plugin</artifactId>
+            <version>${jib-maven-plugin.version}</version>
+            <executions>
+              <execution>
+                <phase>package</phase>
+                <goals>
+                  <goal>dockerBuild</goal>
+                </goals>
+              </execution>
+            </executions>
+            <configuration>
+              <container>
+                <mainClass>${producer.main.class}</mainClass>
+              </container>
+              <from>
+                <image>${base.image}</image>
+              </from>
+              <to>
+                <image>lesson-2-producer:latest</image>
+              </to>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+</project>

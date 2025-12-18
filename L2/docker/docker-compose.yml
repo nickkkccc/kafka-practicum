@@ -1,0 +1,84 @@
+x-kafka-cluster-node: &kafka-cluster-node
+  image: confluentinc/cp-kafka:7.9.5
+  profiles:
+    - cluster
+    - lesson
+  healthcheck:
+    test: [ "CMD", "/bin/kafka-broker-api-versions", "--bootstrap-server", "localhost:9092" ]
+    interval: 30s
+    timeout: 10s
+    retries: 5
+    start_period: 40s
+  depends_on:
+    - zookeeper
+
+x-kafka-env: &kafka-env
+  KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+  KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT
+  KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+  KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+  KAFKA_AUTO_CREATE_TOPICS_ENABLE: false
+
+services:
+  zookeeper:
+    container_name: zookeeper
+    image: confluentinc/cp-zookeeper:7.9.5
+    profiles:
+      - cluster
+      - lesson
+    ports:
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+
+  kafka-1:
+    container_name: kafka-1
+    <<: *kafka-cluster-node
+    environment:
+      <<: *kafka-env
+      KAFKA_BROKER_ID: 1
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-1:9092,EXTERNAL://kafka-1:19092
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,EXTERNAL://0.0.0.0:19092
+
+  kafka-2:
+    container_name: kafka-2
+    <<: *kafka-cluster-node
+    environment:
+      <<: *kafka-env
+      KAFKA_BROKER_ID: 2
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-2:9092,EXTERNAL://kafka-2:19093
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,EXTERNAL://0.0.0.0:19093
+
+  kafka-3:
+    container_name: kafka-3
+    <<: *kafka-cluster-node
+    environment:
+      <<: *kafka-env
+      KAFKA_BROKER_ID: 3
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-3:9092,EXTERNAL://kafka-3:19094
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,EXTERNAL://0.0.0.0:19094
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:v0.7.2
+    profiles:
+      - cluster
+      - lesson
+    ports:
+      - "8080:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: test
+      KAFKA_CLUSTERS_0_BOOTSTRAP_SERVERS: kafka-1:9092,kafka-2:9092,kafka-3:9092
+      KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
+
+  producer:
+    image: lesson-2-producer:latest
+    profiles:
+      - producer
+      - lesson
+    deploy:
+      mode: replicated
+      replicas: 2
+    environment:
+      bootstrap.servers: kafka-1:19092,kafka-2:19093,kafka-3:19094
+      rps: 1
