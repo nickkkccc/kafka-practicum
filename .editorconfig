@@ -63,4 +63,4 @@ indent_size = 2
 indent_size = 2
 ij_any_wrap_long_lines = false
 # The `no` value doesn't work in IntelliJ IDEA so a big number does the trick as well in most cases:
-max_line_length = 9999
+max_line_length = 100
