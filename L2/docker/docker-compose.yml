@@ -35,28 +35,34 @@ services:
   kafka-1:
     container_name: kafka-1
     <<: *kafka-cluster-node
+    ports:
+      - "19092:19092"
     environment:
       <<: *kafka-env
       KAFKA_BROKER_ID: 1
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-1:9092,EXTERNAL://kafka-1:19092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-1:9092,EXTERNAL://localhost:19092
       KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,EXTERNAL://0.0.0.0:19092
 
   kafka-2:
     container_name: kafka-2
     <<: *kafka-cluster-node
+    ports:
+      - "19093:19093"
     environment:
       <<: *kafka-env
       KAFKA_BROKER_ID: 2
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-2:9092,EXTERNAL://kafka-2:19093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-2:9092,EXTERNAL://localhost:19093
       KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,EXTERNAL://0.0.0.0:19093
 
   kafka-3:
     container_name: kafka-3
     <<: *kafka-cluster-node
+    ports:
+      - "19094:19094"
     environment:
       <<: *kafka-env
       KAFKA_BROKER_ID: 3
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-3:9092,EXTERNAL://kafka-3:19094
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka-3:9092,EXTERNAL://localhost:19094
       KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,EXTERNAL://0.0.0.0:19094
 
   kafka-ui:
@@ -80,5 +86,31 @@ services:
       mode: replicated
       replicas: 2
     environment:
-      bootstrap.servers: kafka-1:19092,kafka-2:19093,kafka-3:19094
-      rps: 1
+      bootstrap.servers: kafka-1:9092,kafka-2:9093,kafka-3:9094
+      rps: 10
+      records.count: 20000
+
+  single-message-consumer:
+    image: lesson-2-single-message-consumer:latest
+    profiles:
+      - single-message-consumer
+      - lesson
+    deploy:
+      mode: replicated
+      replicas: 2
+    environment:
+      bootstrap.servers: kafka-1:9092,kafka-2:9093,kafka-3:9094
+
+  batch-consumer:
+    image: lesson-2-batch-consumer:latest
+    profiles:
+      - batch-consumer
+      - lesson
+    deploy:
+      mode: replicated
+      replicas: 2
+    environment:
+      bootstrap.servers: kafka-1:9092,kafka-2:9093,kafka-3:9094
+      poll.timeout: PT15S
+      fetch.max.wait.ms: 10000
+      fetch.min.bytes: 2000

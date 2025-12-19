@@ -13,6 +13,12 @@
   <properties>
     <jib-maven-plugin.version>3.5.1</jib-maven-plugin.version>
     <producer.main.class>kafka.lessons.producer.Producer</producer.main.class>
+    <single-message-consumer.main.class>
+      kafka.lessons.consumer.single.message.SingleMessageConsumer
+    </single-message-consumer.main.class>
+    <batch-consumer.main.class>
+      kafka.lessons.consumer.batch.BatchConsumer
+    </batch-consumer.main.class>
     <base.image>eclipse-temurin:17-jre</base.image>
   </properties>
 
@@ -67,6 +73,68 @@
               </from>
               <to>
                 <image>lesson-2-producer:latest</image>
+              </to>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <profile>
+      <id>single-message-consumer</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>com.google.cloud.tools</groupId>
+            <artifactId>jib-maven-plugin</artifactId>
+            <version>${jib-maven-plugin.version}</version>
+            <executions>
+              <execution>
+                <phase>package</phase>
+                <goals>
+                  <goal>dockerBuild</goal>
+                </goals>
+              </execution>
+            </executions>
+            <configuration>
+              <container>
+                <mainClass>${single-message-consumer.main.class}</mainClass>
+              </container>
+              <from>
+                <image>${base.image}</image>
+              </from>
+              <to>
+                <image>lesson-2-single-message-consumer:latest</image>
+              </to>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <profile>
+      <id>batch-consumer</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>com.google.cloud.tools</groupId>
+            <artifactId>jib-maven-plugin</artifactId>
+            <version>${jib-maven-plugin.version}</version>
+            <executions>
+              <execution>
+                <phase>package</phase>
+                <goals>
+                  <goal>dockerBuild</goal>
+                </goals>
+              </execution>
+            </executions>
+            <configuration>
+              <container>
+                <mainClass>${batch-consumer.main.class}</mainClass>
+              </container>
+              <from>
+                <image>${base.image}</image>
+              </from>
+              <to>
+                <image>lesson-2-batch-consumer:latest</image>
               </to>
             </configuration>
           </plugin>
